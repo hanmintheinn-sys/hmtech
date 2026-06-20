@@ -1,0 +1,1483 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HM TECH - Pro Testing Suite</title>
+<!-- Phosphor Icons -->
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+  /* --- Fully Responsive Variables --- */
+  :root {
+    --primary: #9dff0f;
+    --primary-dim: rgba(157, 255, 15, 0.15);
+    --bg-color: #050505;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --card-hover: rgba(255, 255, 255, 0.08);
+    --card-border: rgba(157, 255, 15, 0.2);
+    --card-border-active: rgba(157, 255, 15, 0.8);
+    --text-main: #ffffff;
+    --text-muted: #888888;
+
+    /* Responsive Spacing Defaults */
+    --app-header-h: 75px;
+    --box-header-h: 70px;
+    --gap-size: 18px;
+    --pad-size: 25px;
+    --font-title: 15px;
+    --font-icon: 22px;
+    --search-w: 200px;
+    --max-w: 900px; 
+    --logo-scale: 0.15;
+  }
+
+  /* Tablet */
+  @media (max-width: 1024px) {
+    :root {
+      --app-header-h: 65px; --box-header-h: 65px; --gap-size: 15px;
+      --pad-size: 20px; --font-title: 14px; --font-icon: 20px;
+      --search-w: 160px; --max-w: 750px; --logo-scale: 0.14;
+    }
+  }
+
+  /* Mobile Portrait */
+  @media (max-width: 768px) {
+    :root {
+      --app-header-h: 60px; --box-header-h: 55px; --gap-size: 12px;
+      --pad-size: 15px; --font-title: 13px; --font-icon: 18px;
+      --search-w: 120px; --logo-scale: 0.12;
+    }
+  }
+
+  /* Core Layout */
+  body {
+    margin: 0; background-color: var(--bg-color); font-family: 'Arial', sans-serif;
+    color: var(--text-main); display: flex; flex-direction: column;
+    background: radial-gradient(circle at top, #111a00 0%, #050505 50%);
+    height: 100vh; height: 100dvh; overflow: hidden; 
+  }
+
+  /* --- Boot & Login Screens --- */
+  #bootScreen {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: #050505; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; z-index: 200;
+    transition: opacity 1s ease-in-out;
+  }
+
+  #copyrightWrapper {
+    position: absolute; text-align: center; color: #888;
+    font-size: 13px; letter-spacing: 0.15em; line-height: 2;
+    opacity: 0; transform: scale(0.9);
+    transition: opacity 2s ease, transform 2s ease; z-index: 20; width: 90%;
+  }
+  #copyrightWrapper.fade-in { opacity: 1; transform: scale(1); color: #ccc; }
+  #copyrightWrapper.zoom-out {
+    transform: scale(15); opacity: 0; filter: blur(20px);
+    transition: transform 1.5s cubic-bezier(0.55, 0.085, 0.68, 0.53), opacity 1s ease 0.5s, filter 1.5s ease;
+  }
+
+  #mainLogoSection {
+    position: absolute; display: none; flex-direction: column; align-items: center;
+    z-index: 10; transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1); width: 100%;
+  }
+  #mainLogoSection.shift-up { transform: translateY(-25vh) scale(0.65); }
+
+  #zoomWrapper { opacity: 0; transform: scale(10); }
+  #zoomWrapper.start-anim { animation: scaleDown 2s cubic-bezier(0.2, 0.9, 0.3, 1.05) forwards; }
+
+  @keyframes scaleDown {
+    0% { transform: scale(10); opacity: 0; filter: blur(30px); }
+    30% { transform: scale(6); opacity: 0.5; filter: blur(15px); }
+    100% { transform: scale(1); opacity: 1; filter: blur(0px); }
+  }
+
+  /* CSS Logo */
+  .logo-container {
+    position: relative; width: 180px; height: 180px;
+    background-color: #000; border: solid 0.1em var(--primary); border-radius: 12px;
+    box-sizing: border-box;
+  }
+  .logo-container.glow { animation: singleGlow 1.2s ease-in-out forwards; }
+  @keyframes singleGlow {
+    0% { filter: drop-shadow(0 0 0px var(--primary)); }
+    10% { filter: drop-shadow(0 0 10px var(--primary)) brightness(1.2); } 
+    100% { filter: drop-shadow(0 0 3px var(--primary)) brightness(1); }  
+  }
+  .negative-space { position: absolute; background-color: var(--primary); }
+  .h-mid-gap { top: 38%; width: 40%; height: 7%; }
+  .v-gap { top: 0%; left: 38%; width: 11%; height: 11%; }
+  .m-shape-left { top: 54%; left: 26%; width: 41%; height: 25%; transform: rotate(45deg); transform-origin: left top; }
+  .m-shape-right { bottom: 35%; right: 44%; width: 25%; height: 41%; transform: rotate(-45deg); transform-origin: right top; }
+  .m-bottom-gap { bottom: 38%; left: 38%; width: 11%; height: 42%; }
+  .m-bottom-hor { bottom: 35%; left: 26%; width: 23%; height: 11%; }
+  .m-bottom-last { bottom: 0%; left: 38%; width: 11%; height: 15%; }
+  .tech-text { position: absolute; bottom: 0; right: 0; color: var(--primary); font-size: 25px; font-weight: bold; letter-spacing: 0.09em; line-height: 1em; }
+
+  .sub-text {
+    margin-top: 40px; color: #fff; font-size: 14px; letter-spacing: 0.35em; font-weight: bold;
+    opacity: 0; transform: translateY(-15px); transition: opacity 1s ease, transform 1s ease; text-align: center; width: 90%;
+  }
+  .sub-text span { color: var(--primary); }
+  .sub-text.show { opacity: 1; transform: translateY(0); }
+  .sub-text.hide { opacity: 0; transform: translateY(20px); }
+
+  /* Login UI */
+  #loginSection {
+    position: absolute; top: 50%; transform: translateY(30px); opacity: 0;
+    display: flex; flex-direction: column; align-items: center;
+    transition: opacity 1.2s ease, transform 1.2s ease; z-index: 15; pointer-events: none; width: 100%;
+  }
+  #loginSection.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .pin-display { display: flex; gap: 15px; margin-bottom: 25px; }
+  .pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #333; background-color: transparent; transition: all 0.3s ease; }
+  .pin-dot.filled { background-color: var(--primary); border-color: var(--primary); box-shadow: 0 0 12px var(--primary); }
+  .pin-dot.error { background-color: #ff0f33; border-color: #ff0f33; box-shadow: 0 0 12px #ff0f33; }
+  
+  .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+  .key-btn {
+    width: 70px; height: 70px; border-radius: 50%; background-color: var(--card-bg);
+    border: 1px solid var(--card-border); color: #fff; font-size: 28px; font-weight: 300;
+    cursor: pointer; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .key-btn:hover, .key-btn:active { background-color: rgba(157, 255, 15, 0.15); border-color: var(--primary); color: var(--primary); box-shadow: 0 0 20px rgba(157, 255, 15, 0.3); transform: scale(0.95); }
+  .key-btn.action-btn { font-size: 24px; background-color: transparent; border: none; }
+  .key-btn.action-btn:hover, .key-btn.action-btn:active { box-shadow: none; color: #ff0f33; background-color: rgba(255, 15, 51, 0.1); }
+  .shake { animation: shake 0.4s ease-in-out; }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-15px); } 40%, 80% { transform: translateX(15px); } }
+
+  /* --- Dashboard Main Interface --- */
+  #mainAppScreen {
+    display: none; flex-direction: column; flex: 1; height: 100dvh; opacity: 0;
+    transition: opacity 1s ease-in-out;
+  }
+
+  /* --- Header --- */
+  .header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 var(--pad-size); height: var(--app-header-h); 
+    border-bottom: 1px solid var(--card-border);
+    background: rgba(1, 1, 1, 0.5); backdrop-filter: blur(10px); flex-shrink: 0; 
+  }
+
+  .header-left { display: flex; align-items: center; gap: 33px; }
+
+  /* Mini Logo */
+  .mini-logo-wrapper {
+    width: 25px; height: 25px; position: relative;
+    transform: scale(var(--logo-scale)); transform-origin: top left; transition: transform 0.3s;
+  }
+  .logo-container-mini {
+    position: absolute; width: 180px; height: 180px; background-color: #000; 
+    border: solid 18px var(--primary); border-radius: 12px; box-sizing: border-box;
+  }
+  .sys-title { font-size: var(--font-title); font-weight: bold; letter-spacing: 2px; }
+  .sys-title span { color: var(--primary); }
+
+  /* Search */
+  .search-container { display: flex; align-items: center; gap: 8px; }
+  #searchInput {
+    width: 0; opacity: 0; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    background: rgba(255,255,255,0.05); border: 1px solid transparent; color: white; 
+    border-radius: 20px; padding: 0; outline: none; font-size: 13px;
+  }
+  #searchInput.active {
+    width: var(--search-w); opacity: 1; padding: 6px 12px; border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(157, 255, 15, 0.15);
+  }
+  .search-icon { font-size: 22px; color: var(--text-muted); cursor: pointer; transition: color 0.3s; }
+  .search-icon:hover, .search-icon.active { color: var(--primary); }
+
+  /* Grid/Row Layout according to orientation */
+  .dashboard-container {
+    display: flex; gap: var(--gap-size); padding: var(--pad-size);
+    margin: 0 auto; box-sizing: border-box; flex: 1; min-height: 0; min-width: 0;
+  }
+
+  @media (orientation: portrait) {
+    .dashboard-container { flex-direction: column; max-width: var(--max-w); width: 100%; }
+  }
+
+  @media (orientation: landscape) {
+    :root { --max-w: 1200px; } 
+    .dashboard-container { flex-direction: row; max-width: var(--max-w); width: 100%; }
+    .module-box { min-width: var(--box-header-h); }
+    .module-box:not(.active) .module-header { padding: 0 15px; }
+  }
+
+  /* --- Expandable Box Styles --- */
+  .module-box {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+    position: relative; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); 
+    flex: 1; min-height: var(--box-header-h); min-width: 0;
+  }
+
+  .module-box.active {
+    background: rgba(20, 30, 5, 0.4); border-color: var(--card-border-active);
+    box-shadow: 0 0 15px rgba(157, 255, 15, 0.15); flex: 6; 
+  }
+
+  .module-header {
+    display: flex; align-items: center; padding: 0 var(--pad-size); height: var(--box-header-h); 
+    position: absolute; top: 50%; left: 0; width: 100%; transform: translateY(-50%);
+    box-sizing: border-box; z-index: 10; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), background 0.3s ease;
+    white-space: nowrap; overflow: hidden; 
+  }
+
+  .module-box.active .module-header {
+    top: 0; transform: translateY(0); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    background: rgba(0, 0, 0, 0.15); border-bottom: 1px solid rgba(157, 255, 15, 0.1);
+  }
+
+  .spacer-left, .spacer-right { transition: flex 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+  .spacer-left { flex: 1; } .spacer-right { flex: 1; }
+  .module-box.active .spacer-left { flex: 0; }
+
+  .module-title {
+    display: flex; align-items: center; font-size: var(--font-title); 
+    font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase;
+    flex-shrink: 1; overflow: hidden; white-space: nowrap;
+  }
+  .module-title i { font-size: var(--font-icon); color: var(--primary); width: 35px; text-align: left; flex-shrink: 0; }
+
+  /* --- Content Area --- */
+  .module-content {
+    flex: 0 0 0%; min-height: 0; overflow-y: auto; overflow-x: hidden; opacity: 0; visibility: hidden; 
+    padding: 0 var(--pad-size);
+    transition: flex 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+    mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+  }
+
+  .module-box.active .module-content {
+    flex: 1 1 0%; opacity: 1; visibility: visible; padding-bottom: var(--pad-size);
+  }
+
+  .content-spacer { height: 0; transition: height 0.4s cubic-bezier(0.25, 1, 0.5, 1); flex-shrink: 0; }
+  .module-box.active .content-spacer { height: calc(var(--box-header-h) + 10px); }
+
+  .module-content::-webkit-scrollbar { width: 4px; }
+  .module-content::-webkit-scrollbar-track { background: transparent; }
+  .module-content::-webkit-scrollbar-thumb { background: rgba(157, 255, 15, 0.5); border-radius: 4px; }
+
+  /* --- List Items --- */
+  .comp-item {
+    padding: 15px 10px; border-bottom: 1px solid rgba(255,255,255,0.05);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 14px; cursor: pointer; transition: color 0.3s, background 0.3s;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+  }
+  .comp-item:last-child { border-bottom: none; }
+  .comp-item i { color: var(--primary); font-size: 16px; flex-shrink: 0; }
+  .comp-item:hover { color: var(--primary); background: rgba(255,255,255,0.02); }
+
+  .comp-item-left i { margin-right: 15px; font-size: 18px; }
+  .comp-item-left { justify-content: flex-start; }
+
+  /* ==========================================================
+     TESTING WORKSPACE / OVERLAY SIMULATOR MODALS
+     ========================================================== */
+  #workspaceOverlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(20px);
+    z-index: 150; display: none; flex-direction: column; opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .work-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 var(--pad-size); height: var(--app-header-h);
+    border-bottom: 1px solid var(--card-border);
+  }
+  .work-title { font-size: 16px; font-weight: bold; letter-spacing: 2px; color: var(--primary); text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+  .btn-close { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; transition: color 0.3s; }
+  .btn-close:hover { color: #ff0f33; }
+
+  .work-content-area {
+    flex: 1; padding: 20px; display: grid; gap: 20px; overflow-y: auto;
+  }
+
+  /* Split layout for simulator screens and controls */
+  @media (min-width: 769px) {
+    .work-content-area { grid-template-columns: 1.2fr 1fr; }
+  }
+
+  /* Display Visual Panel */
+  .visual-panel {
+    background: #000; border: 1px solid var(--card-border); border-radius: 16px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    position: relative; overflow: hidden; min-height: 250px;
+  }
+  .visual-panel canvas { width: 100%; height: 100%; max-height: 350px; display: block; }
+
+  /* Control Knobs & Parameter Adjusters */
+  .controls-panel {
+    background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
+    padding: var(--pad-size); display: flex; flex-direction: column; gap: 20px; justify-content: center;
+  }
+
+  .control-group { display: flex; flex-direction: column; gap: 8px; }
+  .control-label { font-size: 11px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; display: flex; justify-content: space-between; }
+  .control-label span { color: var(--primary); font-weight: bold; }
+  
+  /* Precision Sliders */
+  .pro-slider {
+    -webkit-appearance: none; width: 100%; height: 6px; background: #222; border-radius: 3px; outline: none;
+  }
+  .pro-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--primary); cursor: pointer; box-shadow: 0 0 10px var(--primary);
+  }
+
+  /* Toggle Testing Switch button */
+  .btn-toggle-test {
+    width: 100%; background: var(--primary-dim); border: 1px solid var(--primary);
+    color: var(--primary); padding: 18px; border-radius: 12px; font-size: 14px;
+    letter-spacing: 3px; font-weight: bold; cursor: pointer; text-transform: uppercase;
+    transition: all 0.3s ease; position: relative; overflow: hidden; margin-top: auto;
+  }
+  .btn-toggle-test.running {
+    background: rgba(255, 15, 51, 0.1); border-color: #ff0f33; color: #ff0f33;
+    box-shadow: 0 0 15px rgba(255, 15, 51, 0.2);
+  }
+
+  /* Diagnostics data lists */
+  .live-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+  .stat-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; }
+  .stat-lbl { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+  .stat-val { font-size: 20px; font-weight: bold; color: #fff; margin-top: 5px; }
+  .stat-val span { font-size: 11px; color: var(--primary); margin-left: 2px; }
+
+</style>
+</head>
+<body>
+
+  <!-- ==========================================
+       BOOT SEQUENCE SCREEN
+       ========================================== -->
+  <div id="bootScreen">
+    <div id="copyrightWrapper">
+      <div>©2026 Theingabar Automotive Group.</div>
+      <div>All rights reserved.</div>
+    </div>
+
+    <div id="mainLogoSection">
+      <div id="zoomWrapper">
+        <div class="logo-container" id="logoBox">
+          <div class="negative-space v-gap"></div>
+          <div class="negative-space h-mid-gap"></div>
+          <div class="negative-space m-shape-left"></div>
+          <div class="negative-space m-shape-right"></div>
+          <div class="negative-space m-bottom-gap"></div>
+          <div class="negative-space m-bottom-hor"></div>
+          <div class="negative-space m-bottom-last"></div>
+          <div class="tech-text">TECH.</div>
+        </div>
+      </div>
+      <div id="subText" class="sub-text">TEST - BENCH - PRO - <span>SYSTEM</span></div>
+    </div>
+
+    <!-- Passcode Section -->
+    <div id="loginSection">
+      <div class="pin-display" id="pinDisplay">
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+      <div class="keypad">
+        <button class="key-btn" onclick="enterDigit(1)">1</button>
+        <button class="key-btn" onclick="enterDigit(2)">2</button>
+        <button class="key-btn" onclick="enterDigit(3)">3</button>
+        <button class="key-btn" onclick="enterDigit(4)">4</button>
+        <button class="key-btn" onclick="enterDigit(5)">5</button>
+        <button class="key-btn" onclick="enterDigit(6)">6</button>
+        <button class="key-btn" onclick="enterDigit(7)">7</button>
+        <button class="key-btn" onclick="enterDigit(8)">8</button>
+        <button class="key-btn" onclick="enterDigit(9)">9</button>
+        <button class="key-btn action-btn"></button> 
+        <button class="key-btn" onclick="enterDigit(0)">0</button>
+        <button class="key-btn action-btn" onclick="deleteDigit()"><i class="ph ph-backspace"></i></button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==========================================
+       DASHBOARD MAIN INTERFACE
+       ========================================== -->
+  <div id="mainAppScreen">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="mini-logo-wrapper">
+          <div class="logo-container-mini">
+            <!-- Simulated via CSS Mini borders -->
+            <div style="position:absolute; background:var(--primary); top:0; left:38%; width:11%; height:11%;"></div>
+            <div style="position:absolute; background:var(--primary); top:38%; width:40%; height:7%;"></div>
+            <div style="position:absolute; background:var(--primary); top:54%; left:26%; width:41%; height:25%; transform:rotate(45deg); transform-origin:left top;"></div>
+            <div style="position:absolute; background:var(--primary); bottom:35%; right:44%; width:25%; height:41%; transform:rotate(-45deg); transform-origin:right top;"></div>
+            <div style="position:absolute; background:var(--primary); bottom:38%; left:38%; width:11%; height:42%;"></div>
+            <div style="position:absolute; background:var(--primary); bottom:35%; left:26%; width:23%; height:11%;"></div>
+            <div style="position:absolute; background:var(--primary); bottom:0%; left:38%; width:11%; height:15%;"></div>
+          </div>
+        </div>
+        <div class="sys-title">HM <span>PRO</span></div>
+      </div>
+      
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search item..." onkeyup="searchItems()">
+        <div class="search-icon" id="searchBtn" onclick="toggleSearch()">
+          <i class="ph ph-magnifying-glass"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Flex / Row Area -->
+    <main class="dashboard-container">
+
+      <!-- Box 1: MAIN FUNCTIONS -->
+      <div class="module-box">
+        <div class="module-header" onclick="toggleBox(this.parentElement)">
+          <div class="spacer-left"></div>
+          <div class="module-title"><i class="ph ph-cpu"></i> <span>MAIN FUNCTIONS</span></div>
+          <div class="spacer-right"></div>
+        </div>
+        <div class="module-content">
+          <div class="content-spacer"></div>
+          <div class="comp-list">
+            <div class="comp-item comp-item-left" onclick="openWorkspace('ecm')"><i class="ph ph-microchip"></i> ECM (Engine Control Module)</div>
+            <div class="comp-item comp-item-left" onclick="openWorkspace('scope')"><i class="ph ph-waveform"></i> Oscilloscope</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Box 2: TEST COMPONENTS -->
+      <div class="module-box">
+        <div class="module-header" onclick="toggleBox(this.parentElement)">
+          <div class="spacer-left"></div>
+          <div class="module-title"><i class="ph ph-engine"></i> <span>TEST COMPONENTS</span></div>
+          <div class="spacer-right"></div>
+        </div>
+        <div class="module-content">
+          <div class="content-spacer"></div>
+          <div class="comp-list">
+            <div class="comp-item" onclick="openWorkspace('ignition')">Ignition Coil <i class="ph ph-caret-right"></i></div>
+            <div class="comp-item" onclick="openWorkspace('injector')">Injector <i class="ph ph-caret-right"></i></div>
+            <div class="comp-item" onclick="openWorkspace('crdi')">Injector (CRDI) <i class="ph ph-caret-right"></i></div>
+            <div class="comp-item" onclick="openWorkspace('ocv')">Oil Control Valve <i class="ph ph-caret-right"></i></div>
+            <div class="comp-item" onclick="openWorkspace('servo')">Servo Motor <i class="ph ph-caret-right"></i></div>
+            <div class="comp-item" onclick="openWorkspace('stepper')">Stepper Motor <i class="ph ph-caret-right"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Box 3: DIAGNOSTICS -->
+      <div class="module-box">
+        <div class="module-header" onclick="toggleBox(this.parentElement)">
+          <div class="spacer-left"></div>
+          <div class="module-title"><i class="ph ph-heartbeat"></i> <span>DIAGNOSTICS</span></div>
+          <div class="spacer-right"></div>
+        </div>
+        <div class="module-content">
+          <div class="content-spacer"></div>
+          <div style="font-size: 13px; color: #ccc; line-height: 1.8;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #333; padding-bottom: 10px; margin-bottom: 10px;">
+              <span>ECU Comm</span><span style="color: var(--primary);">OK</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #333; padding-bottom: 10px; margin-bottom: 10px;">
+              <span>CAN Bus</span><span style="color: var(--primary);">ONLINE</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #333; padding-bottom: 10px; margin-bottom: 10px;">
+              <span>Fault Codes</span><span style="color: #fff;">0 FOUND</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span>Calibration</span><span style="color: var(--primary);">PASSED</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Box 4: ABOUT -->
+      <div class="module-box">
+        <div class="module-header" onclick="toggleBox(this.parentElement)">
+          <div class="spacer-left"></div>
+          <div class="module-title"><i class="ph ph-info"></i> <span>ABOUT</span></div>
+          <div class="spacer-right"></div>
+        </div>
+        <div class="module-content">
+          <div class="content-spacer"></div>
+          <div style="text-align: center; padding: 10px 0; color: var(--text-muted); line-height: 1.8;">
+            <i class="ph ph-shield-check" style="font-size: 45px; color: var(--primary); margin-bottom: 15px; text-shadow: 0 0 15px rgba(157, 255, 15, 0.4);"></i>
+            <div style="font-size: 16px; font-weight: bold; color: #fff;">HM PRO SYSTEM</div>
+            <div style="font-size: 12px; letter-spacing: 1px;">Version 4.2.1</div>
+            <div style="margin-top: 20px; font-size: 11px; opacity: 0.7;">
+              © 2026 Theingabar Automotive Group.<br>All rights reserved.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+
+  <!-- ==========================================
+       PRO TESTING WORKSPACE OVERLAY PANEL
+       ========================================== -->
+  <div id="workspaceOverlay">
+    <div class="work-header">
+      <div class="work-title" id="workTitle"><i class="ph ph-cpu"></i> WORKSPACE</div>
+      <button class="btn-close" onclick="closeWorkspace()"><i class="ph ph-x"></i></button>
+    </div>
+    
+    <!-- Dynamic Workspace Loader Content -->
+    <div class="work-content-area" id="workspaceContent">
+      <!-- Injected Dynamically by JS -->
+    </div>
+  </div>
+
+
+  <!-- ==========================================
+       SYSTEM LOGICS & REALTIME ANIMATIONS
+       ========================================== -->
+  <script>
+    // Audio Context variable for signals synthesis
+    let audioCtx = null;
+    let audioOsc = null;
+    let audioGain = null;
+
+    // Active Testing States
+    let isTesting = false;
+    let animationFrameId = null;
+
+    // Initialize Web Audio
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    // Sound effects for specific components
+    function startBuzzSound(frequency) {
+        initAudio();
+        if (audioOsc) stopBuzzSound();
+        audioOsc = audioCtx.createOscillator();
+        audioGain = audioCtx.createGain();
+        
+        audioOsc.type = 'sawtooth'; // Spark sound mimics sawtooth
+        audioOsc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        
+        // Lower sound level
+        audioGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        
+        audioOsc.connect(audioGain);
+        audioGain.connect(audioCtx.destination);
+        audioOsc.start();
+    }
+
+    function stopBuzzSound() {
+        if (audioOsc) {
+            audioOsc.stop();
+            audioOsc.disconnect();
+            audioOsc = null;
+        }
+    }
+
+    function playClickSound(intervalMs) {
+        initAudio();
+        // Dynamic rhythmic injector clicker
+        let lastTime = audioCtx.currentTime;
+        function clickLoop() {
+            if (!isTesting) return;
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.02);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.03);
+            
+            setTimeout(clickLoop, intervalMs);
+        }
+        clickLoop();
+    }
+
+    // --- Boot Animation Sequence ---
+    document.addEventListener("DOMContentLoaded", () => {
+        const copyrightWrapper = document.getElementById('copyrightWrapper');
+        const mainLogoSection = document.getElementById('mainLogoSection');
+        const zoomWrapper = document.getElementById('zoomWrapper');
+        const logoBox = document.getElementById('logoBox');
+        const subtext = document.getElementById('subText');
+        const loginSection = document.getElementById('loginSection');
+
+        setTimeout(() => { copyrightWrapper.classList.add('fade-in'); }, 300);
+
+        setTimeout(() => {
+            copyrightWrapper.classList.remove('fade-in');
+            copyrightWrapper.classList.add('zoom-out');
+            
+            setTimeout(() => {
+                copyrightWrapper.style.display = 'none'; 
+                mainLogoSection.style.display = 'flex'; 
+                zoomWrapper.classList.add('start-anim');
+                
+                setTimeout(() => { subtext.classList.add('show'); }, 1800);
+                setTimeout(() => { logoBox.classList.add('glow'); }, 2600);
+
+                setTimeout(() => {
+                    mainLogoSection.classList.add('shift-up');
+                    subtext.classList.remove('show');
+                    subtext.classList.add('hide');
+                    loginSection.classList.add('show');
+                }, 4500);
+
+            }, 800); 
+        }, 2500); 
+    });
+
+    // --- Passcode Check logic ---
+    let currentPin = "";
+    const correctPin = "2026"; 
+    const maxDigits = 4;
+    const pinDots = document.querySelectorAll('.pin-dot');
+    const pinDisplay = document.getElementById('pinDisplay');
+
+    function updateDots() {
+        pinDots.forEach((dot, index) => {
+            if (index < currentPin.length) {
+                dot.classList.add('filled');
+            } else {
+                dot.classList.remove('filled');
+                dot.classList.remove('error');
+            }
+        });
+    }
+
+    function enterDigit(digit) {
+        if (currentPin.length < maxDigits) {
+            currentPin += digit;
+            updateDots();
+            if (currentPin.length === maxDigits) { setTimeout(checkPin, 200); }
+        }
+    }
+
+    function deleteDigit() {
+        if (currentPin.length > 0) { currentPin = currentPin.slice(0, -1); updateDots(); }
+    }
+
+    function checkPin() {
+        if (currentPin === correctPin) {
+            pinDots.forEach(dot => {
+                dot.style.backgroundColor = '#fff';
+                dot.style.borderColor = '#fff';
+                dot.style.boxShadow = '0 0 20px #fff';
+            });
+            setTimeout(() => {
+                const loginSec = document.getElementById('loginSection');
+                loginSec.innerHTML = "<h2 style='color: var(--primary); letter-spacing: 2px; font-weight: normal; text-align: center; margin-top: 50px; text-shadow: 0 0 10px rgba(157,255,15,0.5);'>ACCESS GRANTED</h2>";
+                
+                setTimeout(() => {
+                    const bootScreen = document.getElementById('bootScreen');
+                    const appScreen = document.getElementById('mainAppScreen');
+                    
+                    bootScreen.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        bootScreen.style.display = 'none';
+                        appScreen.style.display = 'flex'; 
+                        void appScreen.offsetWidth;
+                        appScreen.style.opacity = '1'; 
+                    }, 1000);
+                }, 1200);
+            }, 600);
+        } else {
+            pinDots.forEach(dot => { dot.classList.remove('filled'); dot.classList.add('error'); });
+            pinDisplay.classList.add('shake');
+            setTimeout(() => { pinDisplay.classList.remove('shake'); currentPin = ""; updateDots(); }, 400);
+        }
+    }
+
+    // --- Dashboard Accodion Toggle ---
+    function toggleBox(clickedBox) {
+      const isActive = clickedBox.classList.contains('active');
+      const allBoxes = document.querySelectorAll('.module-box');
+      allBoxes.forEach(box => box.classList.remove('active'));
+      if (!isActive) clickedBox.classList.add('active');
+    }
+
+    // Dismiss box active when clicking workspace areas
+    document.addEventListener('click', function(event) {
+      if (!event.target.closest('.module-box') && !event.target.closest('.search-container')) {
+        document.querySelectorAll('.module-box').forEach(box => box.classList.remove('active'));
+      }
+    });
+
+    // --- Search functionality ---
+    function toggleSearch() {
+      const input = document.getElementById('searchInput');
+      const icon = document.getElementById('searchBtn');
+      input.classList.toggle('active');
+      icon.classList.toggle('active');
+      if (input.classList.contains('active')) {
+        input.focus();
+      } else {
+        input.value = '';
+        searchItems();
+      }
+    }
+
+    function searchItems() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      let foundBoxToOpen = null;
+
+      document.querySelectorAll('.module-box').forEach(box => {
+        let boxHasMatch = false;
+        const listItems = box.querySelectorAll('.comp-item');
+        
+        listItems.forEach(item => {
+          const text = item.textContent.toLowerCase();
+          if (text.includes(query)) {
+            item.style.display = "flex";
+            boxHasMatch = true;
+          } else {
+            item.style.display = "none";
+          }
+        });
+
+        if (query.trim() !== '' && boxHasMatch && !foundBoxToOpen) foundBoxToOpen = box;
+      });
+
+      if (query.trim() !== '' && foundBoxToOpen) {
+        document.querySelectorAll('.module-box').forEach(b => b.classList.remove('active'));
+        foundBoxToOpen.classList.add('active');
+      }
+    }
+
+
+    // ==========================================
+    // MODULE WORKSPACES CONTROLLERS (SIMULATORS)
+    // ==========================================
+    function openWorkspace(moduleType) {
+        const overlay = document.getElementById('workspaceOverlay');
+        const title = document.getElementById('workTitle');
+        const content = document.getElementById('workspaceContent');
+
+        isTesting = false;
+        stopBuzzSound();
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+        // Standard setup configurations for all panels
+        overlay.style.display = "flex";
+        void overlay.offsetWidth;
+        overlay.style.opacity = "1";
+
+        // Generate customized simulator UI depending on component clicked
+        if (moduleType === 'ecm') {
+            title.innerHTML = '<i class="ph ph-microchip"></i> ECM Simulator';
+            content.innerHTML = `
+                <div class="visual-panel">
+                    <div style="font-family:'Courier New', monospace; font-size:12px; color:var(--primary); padding:20px; width:100%; box-sizing:border-box;">
+                        <div style="text-align:center; margin-bottom:15px; font-weight:bold; border-bottom:1px solid var(--primary);">ECU LIVE PARAMETERS</div>
+                        <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:10px;">
+                            <div>RPM Sensor:</div><div id="ecuRpmVal">800 RPM</div>
+                            <div>TPS Angle:</div><div id="ecuTpsVal">15%</div>
+                            <div>ECT Sensor:</div><div id="ecuEctVal">82°C</div>
+                            <div style="color:#fff;">Inj Pulse:</div><div id="ecuPulseVal" style="color:#fff;">2.50 ms</div>
+                            <div style="color:#fff;">Ign Advance:</div><div id="ecuIgnVal" style="color:#fff;">12.0° BTDC</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label class="control-label">RPM Controller <span id="lblRpm">800</span></label>
+                        <input type="range" class="pro-slider" min="600" max="6000" value="800" oninput="adjustECM('rpm', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Throttle Position (TPS) <span id="lblTps">15%</span></label>
+                        <input type="range" class="pro-slider" min="0" max="100" value="15" oninput="adjustECM('tps', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Engine Coolant Temp (ECT) <span id="lblEct">82°C</span></label>
+                        <input type="range" class="pro-slider" min="-10" max="120" value="82" oninput="adjustECM('ect', this.value)">
+                    </div>
+                </div>
+            `;
+            initECM();
+        } 
+        else if (moduleType === 'scope') {
+            title.innerHTML = '<i class="ph ph-waveform"></i> Digital Oscilloscope';
+            content.innerHTML = `
+                <div class="visual-panel">
+                    <canvas id="scopeCanvas"></canvas>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label class="control-label">Time Base / Time/Div <span id="lblTimeBase">10 ms</span></label>
+                        <input type="range" class="pro-slider" min="1" max="100" value="10" oninput="adjustScope('time', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Voltage / Volts/Div <span id="lblVoltsBase">2V</span></label>
+                        <input type="range" class="pro-slider" min="1" max="10" value="2" oninput="adjustScope('volts', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Signal Waveform</label>
+                        <select id="scopeWaveType" style="background:#050505; color:#fff; border:1px solid var(--card-border); padding:10px; border-radius:8px; outline:none;" onchange="adjustScope('type', this.value)">
+                            <option value="sine">Sine Wave (ဆိုင်းလှိုင်း)</option>
+                            <option value="square">Square Wave (စတုရန်းလှိုင်း)</option>
+                            <option value="saw">Sawtooth Wave</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            initScope();
+        }
+        else if (moduleType === 'ignition') {
+            title.innerHTML = '<i class="ph ph-lightning"></i> Ignition Coil Tester';
+            content.innerHTML = `
+                <div class="visual-panel">
+                    <canvas id="ignitionCanvas"></canvas>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label class="control-label">Ignition Frequency (Hz) <span id="lblHz">15 Hz</span></label>
+                        <input type="range" class="pro-slider" min="5" max="150" value="15" oninput="adjustIgnition('hz', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Dwell Time (ms) <span id="lblDwell">3.0 ms</span></label>
+                        <input type="range" class="pro-slider" min="1.0" max="8.0" step="0.1" value="3.0" oninput="adjustIgnition('dwell', this.value)">
+                    </div>
+                    <button class="btn-toggle-test" id="btnIgnTrigger" onclick="toggleIgnition()">Start Coil Test</button>
+                </div>
+            `;
+            initIgnition();
+        }
+        else if (moduleType === 'injector' || moduleType === 'crdi') {
+            const isCRDI = moduleType === 'crdi';
+            title.innerHTML = `<i class="ph ph-drop"></i> ${isCRDI ? 'CRDI Piezo' : 'Solenoid'} Injector Tester`;
+            content.innerHTML = `
+                <div class="visual-panel">
+                    <canvas id="injectorCanvas"></canvas>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label class="control-label">Pulse Width (Injection duration) <span id="lblInjPulse">2.5 ms</span></label>
+                        <input type="range" class="pro-slider" min="0.5" max="10.0" step="0.1" value="2.5" oninput="adjustInjector('pulse', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Test Speed (RPM) <span id="lblInjRpm">800 RPM</span></label>
+                        <input type="range" class="pro-slider" min="400" max="4000" value="800" oninput="adjustInjector('rpm', this.value)">
+                    </div>
+                    <button class="btn-toggle-test" id="btnInjTrigger" onclick="toggleInjector(${isCRDI})">Start Injector Test</button>
+                </div>
+            `;
+            initInjector(isCRDI);
+        }
+        else if (moduleType === 'ocv') {
+            title.innerHTML = '<i class="ph ph-sliders-horizontal"></i> OCV Valve Controller';
+            content.innerHTML = `
+                <div class="visual-panel">
+                    <canvas id="ocvCanvas"></canvas>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label class="control-label">PWM Duty Cycle <span id="lblDuty">0%</span></label>
+                        <input type="range" class="pro-slider" min="0" max="100" value="0" oninput="adjustOCV(this.value)">
+                    </div>
+                    <div class="live-stats">
+                        <div class="stat-card">
+                            <div class="stat-lbl">Solenoid Current</div>
+                            <div class="stat-val" id="ocvCurrent">0.00<span>A</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-lbl">Valve Position</div>
+                            <div class="stat-val" id="ocvPos">0<span>%</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            initOCV();
+        }
+        else if (moduleType === 'servo') {
+            title.innerHTML = '<i class="ph ph-gear-six"></i> Servo Motor Controller';
+            content.innerHTML = `
+                <div class="visual-panel">
+                    <canvas id="servoCanvas"></canvas>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label class="control-label">Target Angle (Degrees) <span id="lblAngle">90°</span></label>
+                        <input type="range" class="pro-slider" min="0" max="180" value="90" oninput="adjustServo(this.value)">
+                    </div>
+                    <div class="live-stats">
+                        <div class="stat-card">
+                            <div class="stat-lbl">Pulse Width</div>
+                            <div class="stat-val" id="servoPulse">1.50<span>ms</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-lbl">Rotational Range</div>
+                            <div class="stat-val">180<span>deg</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            initServo();
+        }
+        else if (moduleType === 'stepper') {
+            title.innerHTML = '<i class="ph ph-arrows-clockwise"></i> Stepper Motor Drive';
+            content.innerHTML = `
+                <div class="visual-panel">
+                    <canvas id="stepperCanvas"></canvas>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label class="control-label">Step Speed (Hz / Delay) <span id="lblStepSpeed">20 Hz</span></label>
+                        <input type="range" class="pro-slider" min="1" max="100" value="20" oninput="adjustStepper('speed', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Direction</label>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-toggle-test" style="margin:0; flex:1;" id="btnStepCW" onclick="adjustStepper('dir', 'CW')">Clockwise</button>
+                            <button class="btn-toggle-test running" style="margin:0; flex:1; background:rgba(255,255,255,0.05); border-color:#555; color:#fff;" id="btnStepCCW" onclick="adjustStepper('dir', 'CCW')">Counter-CW</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            initStepper();
+        }
+    }
+
+    function closeWorkspace() {
+        const overlay = document.getElementById('workspaceOverlay');
+        overlay.style.opacity = "0";
+        isTesting = false;
+        stopBuzzSound();
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        setTimeout(() => { overlay.style.display = "none"; }, 400);
+    }
+
+
+    // ==========================================
+    // MODULE SPECIFIC CALCULATIONS & DRIVERS
+    // ==========================================
+
+    // 1. ECM Simulator Calculations
+    let ecmData = { rpm: 800, tps: 15, ect: 82 };
+    function initECM() {
+        calculateECM();
+    }
+    function adjustECM(param, val) {
+        if (param === 'rpm') {
+            ecmData.rpm = parseInt(val);
+            document.getElementById('lblRpm').innerText = val;
+        } else if (param === 'tps') {
+            ecmData.tps = parseInt(val);
+            document.getElementById('lblTps').innerText = val + '%';
+        } else if (param === 'ect') {
+            ecmData.ect = parseInt(val);
+            document.getElementById('lblEct').innerText = val + '°C';
+        }
+        calculateECM();
+    }
+    function calculateECM() {
+        // Simple automotive math injection calculations
+        let basePulse = 1.5; 
+        let tpsCorrection = ecmData.tps * 0.08;
+        let tempCorrection = 0;
+        if (ecmData.ect < 60) tempCorrection = (60 - ecmData.ect) * 0.05; // enrich when cold
+
+        let calculatedPulse = (basePulse + tpsCorrection + tempCorrection).toFixed(2);
+        
+        // Ignition Advance calculation
+        let calculatedIgn = 10 + (ecmData.rpm / 400) - (ecmData.tps * 0.15);
+        if (calculatedIgn > 35) calculatedIgn = 35; // Cap ignition max advance
+        
+        document.getElementById('ecuRpmVal').innerText = ecmData.rpm + ' RPM';
+        document.getElementById('ecuTpsVal').innerText = ecmData.tps + '%';
+        document.getElementById('ecuEctVal').innerText = ecmData.ect + '°C';
+        document.getElementById('ecuPulseVal').innerText = calculatedPulse + ' ms';
+        document.getElementById('ecuIgnVal').innerText = calculatedIgn.toFixed(1) + '° BTDC';
+    }
+
+    // 2. Oscilloscope Simulator logic
+    let scopeData = { time: 10, volts: 2, type: 'sine', offset: 0 };
+    function initScope() {
+        const canvas = document.getElementById('scopeCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        function drawScope() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0,0, canvas.width, canvas.height);
+
+            // Draw grid lines
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 1;
+            const stepX = canvas.width / 10;
+            const stepY = canvas.height / 8;
+            for(let i=1; i<10; i++) {
+                ctx.beginPath(); ctx.moveTo(i*stepX, 0); ctx.lineTo(i*stepX, canvas.height); ctx.stroke();
+            }
+            for(let i=1; i<8; i++) {
+                ctx.beginPath(); ctx.moveTo(0, i*stepY); ctx.lineTo(canvas.width, i*stepY); ctx.stroke();
+            }
+
+            // Draw center axes lines (Dashed green)
+            ctx.strokeStyle = 'rgba(157, 255, 15, 0.3)';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath(); ctx.moveTo(canvas.width/2, 0); ctx.lineTo(canvas.width/2, canvas.height); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, canvas.height/2); ctx.lineTo(canvas.width, canvas.height/2); ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Plot Waveform
+            ctx.strokeStyle = varColor('--primary');
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = varColor('--primary');
+            ctx.beginPath();
+
+            for(let x = 0; x < canvas.width; x++) {
+                let t = (x / canvas.width) * scopeData.time;
+                let yVal = 0;
+
+                // Adjust frequency based on Time/Div settings
+                let freq = 2; 
+                let angle = (t * freq * Math.PI) + scopeData.offset;
+
+                if (scopeData.type === 'sine') {
+                    yVal = Math.sin(angle);
+                } else if (scopeData.type === 'square') {
+                    yVal = Math.sin(angle) >= 0 ? 1 : -1;
+                } else if (scopeData.type === 'saw') {
+                    yVal = 2 * (angle / (2 * Math.PI) - Math.floor(0.5 + angle / (2 * Math.PI)));
+                }
+
+                // Voltage scaling based on Volts/Div setup
+                let amplitude = (canvas.height / 4) / (scopeData.volts / 2);
+                let y = (canvas.height/2) - (yVal * amplitude);
+
+                if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0; // Reset blur
+
+            scopeData.offset += 0.05;
+            animationFrameId = requestAnimationFrame(drawScope);
+        }
+        drawScope();
+    }
+    function adjustScope(param, val) {
+        if (param === 'time') {
+            scopeData.time = parseInt(val);
+            document.getElementById('lblTimeBase').innerText = val + ' ms';
+        } else if (param === 'volts') {
+            scopeData.volts = parseInt(val);
+            document.getElementById('lblVoltsBase').innerText = val + 'V';
+        } else if (param === 'type') {
+            scopeData.type = val;
+        }
+    }
+
+    // 3. Ignition Coil Spark Simulator
+    let ignData = { hz: 15, dwell: 3.0 };
+    function initIgnition() {
+        const canvas = document.getElementById('ignitionCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        function drawIgnition() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0,0, canvas.width, canvas.height);
+
+            // Draw spark plug graphic vector
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            // Insulator body
+            ctx.fillStyle = '#eee';
+            ctx.fillRect(cx - 15, cy - 80, 30, 80);
+            
+            // Threads metal base
+            ctx.fillStyle = '#666';
+            ctx.fillRect(cx - 18, cy, 36, 40);
+
+            // Ground electrode (bent arm)
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(cx - 18, cy + 30);
+            ctx.lineTo(cx - 18, cy + 70);
+            ctx.lineTo(cx - 5, cy + 70);
+            ctx.stroke();
+
+            // Center electrode
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(cx - 4, cy, 8, 55);
+
+            // Draw real-time spark animation if triggered
+            if (isTesting && Math.random() < (ignData.hz / 100)) {
+                ctx.strokeStyle = '#00f6ff';
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#00f6ff';
+                ctx.beginPath();
+                ctx.moveTo(cx, cy + 55);
+                
+                // Jagged line vectors mimicking real spark discharge
+                let sx = cx;
+                let sy = cy + 55;
+                const endY = cy + 70;
+                while(sy < endY) {
+                    sx += (Math.random() - 0.5) * 8;
+                    sy += 3;
+                    ctx.lineTo(sx, sy);
+                }
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+
+            animationFrameId = requestAnimationFrame(drawIgnition);
+        }
+        drawIgnition();
+    }
+    function toggleIgnition() {
+        const btn = document.getElementById('btnIgnTrigger');
+        isTesting = !isTesting;
+        if (isTesting) {
+            btn.innerText = "Stop Coil Test";
+            btn.classList.add('running');
+            startBuzzSound(ignData.hz * 3); // Frequency mapped to pitch
+        } else {
+            btn.innerText = "Start Coil Test";
+            btn.classList.remove('running');
+            stopBuzzSound();
+        }
+    }
+    function adjustIgnition(param, val) {
+        if (param === 'hz') {
+            ignData.hz = parseInt(val);
+            document.getElementById('lblHz').innerText = val + ' Hz';
+            if (isTesting) startBuzzSound(ignData.hz * 3);
+        } else if (param === 'dwell') {
+            ignData.dwell = parseFloat(val);
+            document.getElementById('lblDwell').innerText = val + ' ms';
+        }
+    }
+
+    // 4. Injector Spray Simulator
+    let injData = { pulse: 2.5, rpm: 800 };
+    let sprayDroplets = [];
+    function initInjector() {
+        const canvas = document.getElementById('injectorCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        function drawInjector() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0,0, canvas.width, canvas.height);
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 3;
+
+            // Injector body (vector)
+            ctx.fillStyle = '#444';
+            ctx.fillRect(cx - 15, cy - 80, 30, 80);
+            ctx.fillStyle = '#222';
+            ctx.fillRect(cx - 8, cy, 16, 20);
+
+            // Spray droplets physics logic
+            if (isTesting) {
+                // Number of generated particles depends on injection duration (pulse-width)
+                let dropCount = Math.floor(injData.pulse * 3);
+                for(let i=0; i<dropCount; i++) {
+                    sprayDroplets.push({
+                        x: cx,
+                        y: cy + 20,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: 4 + Math.random() * 8,
+                        alpha: 1
+                    });
+                }
+            }
+
+            // Draw droplets spray
+            ctx.fillStyle = 'rgba(157, 255, 15, 0.6)';
+            for(let i=sprayDroplets.length-1; i>=0; i--) {
+                let d = sprayDroplets[i];
+                d.x += d.vx;
+                d.y += d.vy;
+                d.alpha -= 0.05; // fade away downstream
+
+                if (d.alpha <= 0) {
+                    sprayDroplets.splice(i, 1);
+                } else {
+                    ctx.fillStyle = `rgba(157, 255, 15, ${d.alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(d.x, d.y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            animationFrameId = requestAnimationFrame(drawInjector);
+        }
+        drawInjector();
+    }
+    function toggleInjector(isCRDI) {
+        const btn = document.getElementById('btnInjTrigger');
+        isTesting = !isTesting;
+        if (isTesting) {
+            btn.innerText = "Stop Injector Test";
+            btn.classList.add('running');
+            
+            // Map test click speed from RPM
+            let interval = (60000 / injData.rpm);
+            playClickSound(isCRDI ? interval / 2 : interval); // CRDI clicks faster/double pulses
+        } else {
+            btn.innerText = "Start Injector Test";
+            btn.classList.remove('running');
+        }
+    }
+    function adjustInjector(param, val) {
+        if (param === 'pulse') {
+            injData.pulse = parseFloat(val);
+            document.getElementById('lblInjPulse').innerText = val + ' ms';
+        } else if (param === 'rpm') {
+            injData.rpm = parseInt(val);
+            document.getElementById('lblInjRpm').innerText = val + ' RPM';
+        }
+    }
+
+    // 5. Oil Control Valve (OCV) spool displacement simulator
+    let ocvDuty = 0;
+    function initOCV() {
+        const canvas = document.getElementById('ocvCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        function drawOCV() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0,0, canvas.width, canvas.height);
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            // Valve sleeve housing outline
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(cx - 100, cy - 25, 200, 50);
+
+            // Spool elements inside sliding dynamically based on duty
+            let slideOffset = (ocvDuty / 100) * 40; // Max slide displacement 40px
+
+            ctx.fillStyle = varColor('--primary');
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = varColor('--primary');
+
+            // Draw sliding pistons of VVT spool valve
+            ctx.fillRect(cx - 80 + slideOffset, cy - 22, 20, 44);
+            ctx.fillRect(cx - 10 + slideOffset, cy - 22, 20, 44);
+            ctx.fillRect(cx + 60 + slideOffset, cy - 22, 20, 44);
+            
+            // Connector rod
+            ctx.fillStyle = '#888';
+            ctx.fillRect(cx - 95 + slideOffset, cy - 5, 190, 10);
+            ctx.shadowBlur = 0;
+
+            animationFrameId = requestAnimationFrame(drawOCV);
+        }
+        drawOCV();
+    }
+    function adjustOCV(val) {
+        ocvDuty = parseInt(val);
+        document.getElementById('lblDuty').innerText = val + '%';
+        
+        // Calculate outputs dynamically
+        let current = (ocvDuty / 100) * 1.25; // Amp max at 1.25A
+        document.getElementById('ocvCurrent').innerHTML = current.toFixed(2) + '<span>A</span>';
+        document.getElementById('ocvPos').innerHTML = val + '<span>%</span>';
+    }
+
+    // 6. Servo Motor Angle position simulator
+    let servoAngle = 90;
+    function initServo() {
+        const canvas = document.getElementById('servoCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        function drawServo() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0,0, canvas.width, canvas.height);
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const radius = 60;
+
+            // Motor circular outer case body
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Angular divisions marks
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            for(let a=0; a<=180; a+=30) {
+                let rad = (a + 180) * Math.PI / 180;
+                ctx.beginPath();
+                ctx.moveTo(cx + Math.cos(rad) * radius, cy + Math.sin(rad) * radius);
+                ctx.lineTo(cx + Math.cos(rad) * (radius - 10), cy + Math.sin(rad) * (radius - 10));
+                ctx.stroke();
+            }
+
+            // Sweeping pointer based on duty angle selected
+            let targetRad = (servoAngle - 180) * Math.PI / 180;
+            ctx.strokeStyle = varColor('--primary');
+            ctx.lineWidth = 4;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = varColor('--primary');
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + Math.cos(targetRad) * (radius + 15), cy + Math.sin(targetRad) * (radius + 15));
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            animationFrameId = requestAnimationFrame(drawServo);
+        }
+        drawServo();
+    }
+    function adjustServo(val) {
+        servoAngle = parseInt(val);
+        document.getElementById('lblAngle').innerText = val + '°';
+        
+        // Analog ms pulse conversions
+        let pulseMs = 1.0 + (servoAngle / 180) * 1.0; // 1.0ms to 2.0ms range
+        document.getElementById('servoPulse').innerHTML = pulseMs.toFixed(2) + '<span>ms</span>';
+    }
+
+    // 7. Stepper Motor sequencing phases simulator
+    let stepperData = { speed: 20, dir: 'CW', currentPhase: 0 };
+    function initStepper() {
+        const canvas = document.getElementById('stepperCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        function drawStepper() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0,0, canvas.width, canvas.height);
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            // Four electromagnetic coils representation
+            const positions = [
+                {x: cx, y: cy - 60}, // North
+                {x: cx + 60, y: cy}, // East
+                {x: cx, y: cy + 60}, // South
+                {x: cx - 60, y: cy}  // West
+            ];
+
+            // Render coils
+            positions.forEach((p, idx) => {
+                ctx.strokeStyle = '#444';
+                ctx.lineWidth = 3;
+                
+                // Highlight the active energized phase matching cycle sequence
+                if (idx === stepperData.currentPhase) {
+                    ctx.strokeStyle = varColor('--primary');
+                    ctx.fillStyle = 'rgba(157, 255, 15, 0.1)';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 18, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 15, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+
+            // Rotating central permanent magnet rotor
+            let rotationAngle = (stepperData.currentPhase * 90) * Math.PI / 180;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(rotationAngle);
+            
+            // Draw central arrow
+            ctx.fillStyle = '#888';
+            ctx.beginPath();
+            ctx.moveTo(-8, 30); ctx.lineTo(8, 30); ctx.lineTo(0, -35);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+
+            // Advance microsteps matching delays
+            if (Math.random() < (stepperData.speed / 100)) {
+                if (stepperData.dir === 'CW') {
+                    stepperData.currentPhase = (stepperData.currentPhase + 1) % 4;
+                } else {
+                    stepperData.currentPhase = (stepperData.currentPhase - 1 + 4) % 4;
+                }
+            }
+
+            animationFrameId = requestAnimationFrame(drawStepper);
+        }
+        drawStepper();
+    }
+    function adjustStepper(param, val) {
+        if (param === 'speed') {
+            stepperData.speed = parseInt(val);
+            document.getElementById('lblStepSpeed').innerText = val + ' Hz';
+        } else if (param === 'dir') {
+            stepperData.dir = val;
+            const btnCW = document.getElementById('btnStepCW');
+            const btnCCW = document.getElementById('btnStepCCW');
+            if (val === 'CW') {
+                btnCW.className = "btn-toggle-test";
+                btnCCW.className = "btn-toggle-test running";
+                btnCCW.style.background = "rgba(255,255,255,0.05)";
+                btnCCW.style.borderColor = "#555";
+                btnCCW.style.color = "#fff";
+            } else {
+                btnCCW.className = "btn-toggle-test";
+                btnCW.className = "btn-toggle-test running";
+                btnCW.style.background = "rgba(255,255,255,0.05)";
+                btnCW.style.borderColor = "#555";
+                btnCW.style.color = "#fff";
+            }
+        }
+    }
+
+    // Helper to extract colors from root stylesheet variables
+    function varColor(variableName) {
+        return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+    }
+
+  </script>
+</body>
+</html>
+
+```
