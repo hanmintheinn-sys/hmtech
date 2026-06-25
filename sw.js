@@ -1,11 +1,11 @@
 const CACHE_NAME = 'scope-pro-cache-v2';
 const urlsToCache = [
   '/',
-  '/index.html',
-  '/css/style.css',
-  '/js/app.js',
-  '/js/renderer.js',
-  '/manifest.json'
+  '/hmtech/index.html',
+  '/hmtech/css/style.css',
+  '/hmtech/js/app.js',
+  '/hmtech/js/renderer.js',
+  '/hmetch/manifest.json'
 ];
 
 self.addEventListener('install', event => {
