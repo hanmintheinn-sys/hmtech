@@ -2,13 +2,13 @@
   "name": "HM Tech Oscilloscope Pro",
   "short_name": "Scope Pro",
   "description": "Professional Real-time Oscilloscope",
-  "start_url": "/index.html",
+  "start_url": "/hmtech/index.html",
   "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#050505",
   "theme_color": "#9dff0f",
   "icons": [
-    { "src": "icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/icon-512x512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "/hmtech/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/hmtech/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
