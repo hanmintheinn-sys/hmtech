@@ -5,11 +5,11 @@ window.tScaleSteps = [1, 2, 5, 10, 20, 50, 100]; // ms
 // --- Global State ---
 window.scopeState = {
     isRunning: true,
-    isConnected: false,  // ESP32 နှင့် ချိတ်ဆက်မှု အခြေအနေ
+    isConnected: false,
     mode: 'YT',
-    ch1: { scaleIdx: 5, coupling: 'AC', active: true }, // 5.0V
-    ch2: { scaleIdx: 4, coupling: 'DC', active: true }, // 2.0V
-    timebaseIdx: 3, // 10ms
+    ch1: { scaleIdx: 5, coupling: 'AC', active: true }, 
+    ch2: { scaleIdx: 4, coupling: 'DC', active: true }, 
+    timebaseIdx: 3, 
     trigger: { src: 'CH1', mode: 'AUTO' }
 };
 
@@ -22,7 +22,6 @@ function updateUIButtons(groupId, activeText) {
     });
 }
 
-// ခလုတ်များမှ ခေါ်သုံးမည့် Function များ (Global)
 window.adjustScale = function(ch, dir) {
     let idx = window.scopeState[ch].scaleIdx + dir;
     if(idx >= 0 && idx < window.vScaleSteps.length) {
@@ -66,10 +65,10 @@ window.toggleRunStop = function() {
     badge.classList.toggle('stop', !window.scopeState.isRunning);
 };
 
-// --- PWA Service Worker Registration ---
+// ★ PWA Service Worker Registration Fix
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
+        navigator.serviceWorker.register('./sw.js')
             .then(reg => console.log('SW Registered successfully:', reg.scope))
             .catch(err => console.log('SW Registration Failed:', err));
     });
