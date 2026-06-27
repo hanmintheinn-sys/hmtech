@@ -5,9 +5,10 @@ const container = document.getElementById('canvasContainer');
 let width, height;
 let timePhase = 0;
 
-// WebSocket မှ Data လှမ်းထည့်နိုင်ရန် Global Array များအဖြစ် ကြေညာခြင်း
-window.ch1Data = null;
-window.ch2Data = null;
+// ★ Memory Fix: Resize တိုင်း Array အသစ်မဆောက်စေရန် Fixed Size ပေးထားသည်
+const MAX_POINTS = 2048; 
+window.ch1Data = new Float32Array(MAX_POINTS);
+window.ch2Data = new Float32Array(MAX_POINTS);
 
 function resizeCanvas() {
     const rect = container.getBoundingClientRect();
@@ -17,13 +18,9 @@ function resizeCanvas() {
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     ctx.scale(dpr, dpr);
-    
-    // Array များကို Browser လေးမသွားစေရန် Resize လုပ်ချိန်တွင်သာ တစ်ခါတည်း ဆောက်ပါ (Memory Leak Fixed)
-    window.ch1Data = new Float32Array(width);
-    window.ch2Data = new Float32Array(width);
 }
 window.addEventListener('resize', resizeCanvas);
-resizeCanvas(); // Initial call
+resizeCanvas();
 
 function drawGrid() {
     ctx.fillStyle = '#000000';
@@ -41,7 +38,6 @@ function drawGrid() {
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
     }
 
-    // Center Crosshairs
     ctx.strokeStyle = 'rgba(157, 255, 15, 0.4)';
     ctx.setLineDash([4, 4]);
     ctx.beginPath(); ctx.moveTo(width/2, 0); ctx.lineTo(width/2, height); ctx.stroke();
@@ -55,9 +51,11 @@ function drawWaveforms() {
     let ch1VScale = window.vScaleSteps[state.ch1.scaleIdx];
     let ch2VScale = window.vScaleSteps[state.ch2.scaleIdx];
 
-    // ★ ESP32 နှင့် မချိတ်ရသေးချိန်တွင်သာ လှိုင်းအတု (Dummy) ပြမည်
+    // Responsive length
+    let pointsToDraw = Math.min(width, MAX_POINTS);
+
     if (!state.isConnected) {
-        for (let i = 0; i < width; i++) {
+        for (let i = 0; i < pointsToDraw; i++) {
             let t = (i * (0.5 / tScale)) + timePhase;
             window.ch1Data[i] = state.ch1.coupling === 'GND' ? 0 : Math.sin(t) * 10;
             window.ch2Data[i] = state.ch2.coupling === 'GND' ? 0 : Math.cos(t * 1.5) * 8;
@@ -67,23 +65,23 @@ function drawWaveforms() {
     if (state.mode === 'YT') {
         ctx.lineWidth = 1.5;
         
-        // CH1
         ctx.strokeStyle = '#ffcc00';
         ctx.beginPath();
-        for (let x = 0; x < width; x++) {
-            let pixelValue = (window.ch1Data[x] / ch1VScale) * (height/8);
-            let y = (height / 2) - pixelValue - 40; // Offset up
-            x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        for (let i = 0; i < pointsToDraw; i++) {
+            let x = (i / pointsToDraw) * width;
+            let pixelValue = (window.ch1Data[i] / ch1VScale) * (height/8);
+            let y = (height / 2) - pixelValue - 40;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
         }
         ctx.stroke();
 
-        // CH2
         ctx.strokeStyle = '#00e5ff';
         ctx.beginPath();
-        for (let x = 0; x < width; x++) {
-            let pixelValue = (window.ch2Data[x] / ch2VScale) * (height/8);
-            let y = (height / 2) - pixelValue + 40; // Offset down
-            x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        for (let i = 0; i < pointsToDraw; i++) {
+            let x = (i / pointsToDraw) * width;
+            let pixelValue = (window.ch2Data[i] / ch2VScale) * (height/8);
+            let y = (height / 2) - pixelValue + 40;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
         }
         ctx.stroke();
 
@@ -91,7 +89,7 @@ function drawWaveforms() {
         ctx.strokeStyle = '#9dff0f';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        for (let i = 0; i < width; i++) {
+        for (let i = 0; i < pointsToDraw; i++) {
             let pX = (window.ch1Data[i] / ch1VScale) * (width/10);
             let pY = (window.ch2Data[i] / ch2VScale) * (height/8);
             let cx = (width / 2) + pX;
@@ -106,9 +104,8 @@ function render() {
     if(window.scopeState.isRunning) {
         drawGrid();
         drawWaveforms();
-        timePhase += 0.1; // Dummy time forward
+        timePhase += 0.1; 
     }
     requestAnimationFrame(render);
 }
-
-render(); // Start engine
+render();
